@@ -1,85 +1,263 @@
 
-Got it 👍 You want a simple HTML code for a student timetable. Here’s a very easy version you can copy and use:
-
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
 <head>
-  <title>Student Timetable</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Biometric Demo — Face Snapshot (HTML)</title>
   <style>
-    table {
-      width: 80%;
-      border-collapse: collapse;
-      margin: 20px auto;
-    }
-    th, td {
-      border: 1px solid black;
-      padding: 10px;
-      text-align: center;
-    }
-    th {
-      background-color: #f2f2f2;
-    }
-    h2 {
-      text-align: center;
-    }
+    :root { --accent: #3b82f6; --bg: #f7f9fc; --card: #fff; --muted:#6b7280;}
+    body{font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background:linear-gradient(180deg,#eef2ff 0%,var(--bg) 100%); margin:0; padding:28px; color:#111;}
+    .wrap{max-width:920px;margin:0 auto;display:grid;grid-template-columns:1fr 360px;gap:20px;}
+    .card{background:var(--card);border-radius:12px;padding:18px;box-shadow:0 6px 20px rgba(16,24,40,0.06);}
+    header{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+    h1{font-size:18px;margin:0}
+    p.lead{margin:0;color:var(--muted);font-size:13px}
+    video{width:100%;height:auto;border-radius:8px;background:#000;display:block;}
+    .controls{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+    button{background:var(--accent);color:white;padding:10px 12px;border-radius:8px;border:0;cursor:pointer;
+      font-weight:600}
+    button.secondary{background:#e6eefc;color:var(--accent);font-weight:600}
+    button.danger{background:#ef4444}
+    .side{display:flex;flex-direction:column;gap:12px}
+    .mini{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .thumb{background:#f3f4f6;border-radius:8px;padding:8px;display:flex;flex-direction:column;gap:8px;align-items:center;}
+    canvas{display:none;}
+    .log{font-size:13px;color:var(--muted);min-height:44px;padding:8px;border-radius:8px;background:#fbfbfc}
+    .result{padding:10px;border-radius:8px;font-weight:700}
+    .ok{background:#ecfdf5;color:#065f46}
+    .nope{background:#fff1f2;color:#9f1239}
+    footer{font-size:12px;color:var(--muted);margin-top:14px}
+    @media (max-width:880px){ .wrap{ grid-template-columns:1fr; } .side{order:2} }
   </style>
 </head>
 <body>
-  <h2>Student Time Table</h2>
-  <table>
-    <tr>
-      <th>Day</th>
-      <th>9-10 AM</th>
-      <th>10-11 AM</th>
-      <th>11-12 PM</th>
-      <th>12-1 PM</th>
-      <th>2-3 PM</th>
-    </tr>
-    <tr>
-      <td>Monday</td>
-      <td>Math</td>
-      <td>English</td>
-      <td>Science</td>
-      <td>Break</td>
-      <td>Computer</td>
-    </tr>
-    <tr>
-      <td>Tuesday</td>
-      <td>English</td>
-      <td>Math</td>
-      <td>History</td>
-      <td>Break</td>
-      <td>Sports</td>
-    </tr>
-    <tr>
-      <td>Wednesday</td>
-      <td>Science</td>
-      <td>Math</td>
-      <td>English</td>
-      <td>Break</td>
-      <td>Drawing</td>
-    </tr>
-    <tr>
-      <td>Thursday</td>
-      <td>Computer</td>
-      <td>Science</td>
-      <td>English</td>
-      <td>Break</td>
-      <td>Music</td>
-    </tr>
-    <tr>
-      <td>Friday</td>
-      <td>Math</td>
-      <td>History</td>
-      <td>Science</td>
-      <td>Break</td>
-      <td>Sports</td>
-    </tr>
-  </table>
+  <div class="wrap">
+    <div class="card">
+      <header>
+        <div style="width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,#60a5fa,#7c3aed)"></div>
+        <div>
+          <h1>Biometric Demo — Face Snapshot</h1>
+          <p class="lead">Enroll a snapshot, then try to recognize. Demo only — not secure for real authentication.</p>
+        </div>
+      </header>
+
+      <video id="video" autoplay playsinline></video>
+      <canvas id="canvas"></canvas>
+
+      <div class="controls">
+        <button id="startCam">Start Camera</button>
+        <button class="secondary" id="enrollBtn">Enroll Snapshot</button>
+        <button id="recognizeBtn">Recognize</button>
+        <button class="secondary" id="clearEnroll">Clear Enrollment</button>
+        <button class="danger" id="stopCam">Stop Camera</button>
+      </div>
+
+      <div style="margin-top:14px;display:flex;gap:12px;align-items:center;">
+        <div style="flex:1">
+          <div style="font-size:13px;color:var(--muted);margin-bottom:6px">Status</div>
+          <div class="log" id="status">Camera not started.</div>
+        </div>
+        <div style="width:160px">
+          <div style="font-size:13px;color:var(--muted);margin-bottom:6px">Match Result</div>
+          <div id="resultBox" class="result">—</div>
+        </div>
+      </div>
+
+      <footer>
+        Tip: open the page from <code>localhost</code> or HTTPS so the camera works. This demo matches snapshots using a naive pixel-difference algorithm.
+      </footer>
+    </div>
+
+    <div class="side">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <strong>Enrollment</strong>
+          <small style="color:var(--muted)">Stored snapshot (client-only)</small>
+        </div>
+        <div class="mini">
+          <div class="thumb">
+            <div style="font-size:12px;color:var(--muted)">Enrolled</div>
+            <img id="enrolledPreview" alt="No enrollment" style="width:100%;border-radius:6px;display:block" />
+            <div id="enrollInfo" style="font-size:12px;color:var(--muted);margin-top:6px">None</div>
+          </div>
+          <div class="thumb">
+            <div style="font-size:12px;color:var(--muted)">Last Capture</div>
+            <img id="lastCapturePreview" alt="No capture" style="width:100%;border-radius:6px;display:block" />
+            <div id="capInfo" style="font-size:12px;color:var(--muted);margin-top:6px">—</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <strong>How this demo works</strong>
+        <ol style="padding-left:18px">
+          <li style="margin-bottom:6px">Start camera, position your face inside the frame.</li>
+          <li style="margin-bottom:6px">Click <em>Enroll Snapshot</em> to save one image (client-side only).</li>
+          <li style="margin-bottom:6px">Later click <em>Recognize</em> to take a live image and compare it to the enrolled image.</li>
+        </ol>
+        <div style="font-size:12px;color:var(--muted);margin-top:8px">
+          Note: algorithm = downscale → grayscale → absolute pixel difference → threshold. Fast but not robust.
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+(async function(){
+  const video = document.getElementById('video');
+  const canvas = document.getElementById('canvas');
+  const startCam = document.getElementById('startCam');
+  const stopCam = document.getElementById('stopCam');
+  const enrollBtn = document.getElementById('enrollBtn');
+  const recognizeBtn = document.getElementById('recognizeBtn');
+  const status = document.getElementById('status');
+  const resultBox = document.getElementById('resultBox');
+  const enrolledPreview = document.getElementById('enrolledPreview');
+  const lastCapturePreview = document.getElementById('lastCapturePreview');
+  const enrollInfo = document.getElementById('enrollInfo');
+  const capInfo = document.getElementById('capInfo');
+  const clearEnroll = document.getElementById('clearEnroll');
+
+  let stream = null;
+  let enrolledDescriptor = null;
+  let enrolledImageDataURL = null;
+
+  // small fixed size for comparison (downscale to speed up)
+  const S = 64; // 64x64
+  const threshold = 0.18; // lower = stricter; adjust
+
+  function log(msg){
+    status.textContent = msg;
+  }
+
+  function stopStream(){
+    if(stream){
+      stream.getTracks().forEach(t => t.stop());
+      stream = null;
+      log('Camera stopped.');
+    }
+  }
+
+  async function startStream(){
+    try{
+      stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 }, audio:false });
+      video.srcObject = stream;
+      log('Camera started.');
+    } catch (err){
+      console.error(err);
+      log('Error starting camera: ' + err.message);
+    }
+  }
+
+  startCam.addEventListener('click', async ()=> {
+    await startStream();
+  });
+
+  stopCam.addEventListener('click', ()=> {
+    stopStream();
+  });
+
+  // capture and return an ImageData object downscaled to SxS grayscale array (float 0..1)
+  function captureDescriptor(){
+    const w = S, h = S;
+    canvas.width = w; canvas.height = h;
+    const ctx = canvas.getContext('2d');
+    // draw current video frame to canvas, cover fill
+    ctx.drawImage(video, 0, 0, w, h);
+    const id = ctx.getImageData(0,0,w,h);
+    const data = id.data;
+    const arr = new Float32Array(w*h);
+    for(let i=0, j=0; i<data.length; i+=4, j++){
+      // convert to grayscale luminosity
+      const r = data[i], g = data[i+1], b = data[i+2];
+      arr[j] = (0.2126*r + 0.7152*g + 0.0722*b) / 255;
+    }
+    return { arr, w, h, imageData: id };
+  }
+
+  function descriptorToDataURL(imageData){
+    // render to temporary canvas at larger size for preview
+    const tmp = document.createElement('canvas');
+    tmp.width = imageData.width;
+    tmp.height = imageData.height;
+    tmp.getContext('2d').putImageData(imageData,0,0);
+    return tmp.toDataURL('image/png');
+  }
+
+  function compareDescriptors(a, b){
+    // both Float32Array same length
+    if(!a || !b) return Infinity;
+    const n = a.length;
+    let sum = 0;
+    for(let i=0;i<n;i++){
+      sum += Math.abs(a[i] - b[i]);
+    }
+    // average difference normalized (0..1)
+    return sum / n;
+  }
+
+  enrollBtn.addEventListener('click', ()=>{
+    if(!video.srcObject){
+      log('Start the camera first.');
+      return;
+    }
+    const desc = captureDescriptor();
+    enrolledDescriptor = desc.arr;
+    enrolledImageDataURL = descriptorToDataURL(desc.imageData);
+    enrolledPreview.src = enrolledImageDataURL;
+    enrollInfo.textContent = new Date().toLocaleString();
+    log('Snapshot enrolled (client-only).');
+    resultBox.textContent = '—';
+    resultBox.className = 'result';
+  });
+
+  recognizeBtn.addEventListener('click', ()=>{
+    if(!video.srcObject){
+      log('Start the camera first.');
+      return;
+    }
+    if(!enrolledDescriptor){
+      log('No enrollment found — enroll a snapshot first.');
+      return;
+    }
+    const desc = captureDescriptor();
+    lastCapturePreview.src = descriptorToDataURL(desc.imageData);
+    capInfo.textContent = new Date().toLocaleTimeString();
+    const diff = compareDescriptors(enrolledDescriptor, desc.arr);
+    const pass = diff <= threshold;
+    const pct = Math.round((1 - Math.min(diff,1)) * 100);
+    if(pass){
+      resultBox.textContent = `Match (${pct}%) — Access Granted`;
+      resultBox.className = 'result ok';
+    } else {
+      resultBox.textContent = `No Match (${pct}%) — Access Denied`;
+      resultBox.className = 'result nope';
+    }
+    log('Recognition done. Difference: ' + diff.toFixed(4));
+  });
+
+  clearEnroll.addEventListener('click', ()=>{
+    enrolledDescriptor = null;
+    enrolledImageDataURL = null;
+    enrolledPreview.src = '';
+    enrollInfo.textContent = 'None';
+    log('Enrollment cleared.');
+    resultBox.textContent = '—';
+    resultBox.className = 'result';
+  });
+
+  // Try to auto-start when page loaded if allowed
+  if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
+    log('Click "Start Camera" to begin.');
+  } else {
+    log('getUserMedia not supported in this browser.');
+  }
+
+  // stop camera on page unload
+  window.addEventListener('beforeunload', ()=> stopStream());
+})();
+</script>
 </body>
 </html>
-
-👉 This will create a clean timetable with days and subjects.
-
-Do you want me to make an ultra-short version (without CSS, just table only) so it’s the easiest form?
-
